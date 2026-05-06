@@ -3,60 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Video to GIF Converter</title>
+  <title>Video Crop & Trim Tool</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
-  <script>
-    const GIF_WORKER_CODE = `
-      importScripts('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
-    `;
-    const GIF_WORKER_URL = URL.createObjectURL(new Blob([GIF_WORKER_CODE], { type: 'application/javascript' }));
-  </script>
   <style>
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    video { max-height: 58vh; }
+    video { max-height: 62vh; }
+    .glass { background: rgba(15,23,42,.76); backdrop-filter: blur(18px); }
     .crop-box {
       position: absolute;
-      border: 2px dashed #22c55e;
-      background: rgba(34, 197, 94, 0.12);
+      border: 2px dashed #38bdf8;
+      background: rgba(56, 189, 248, .12);
+      box-shadow: 0 0 0 9999px rgba(0,0,0,.48);
       cursor: move;
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+      touch-action: none;
     }
     .handle {
       position: absolute;
-      width: 14px;
-      height: 14px;
-      background: #22c55e;
+      width: 16px;
+      height: 16px;
       border-radius: 999px;
       border: 2px solid white;
+      background: #38bdf8;
     }
-    .handle.br { right: -8px; bottom: -8px; cursor: nwse-resize; }
-    .handle.tl { left: -8px; top: -8px; cursor: nwse-resize; }
-    .handle.tr { right: -8px; top: -8px; cursor: nesw-resize; }
-    .handle.bl { left: -8px; bottom: -8px; cursor: nesw-resize; }
-    .drag-over { border-color: rgba(34, 211, 238, 0.8) !important; }
-    .drag-over #dropLayer { opacity: 1; }
+    .tl { left: -9px; top: -9px; cursor: nwse-resize; }
+    .tr { right: -9px; top: -9px; cursor: nesw-resize; }
+    .bl { left: -9px; bottom: -9px; cursor: nesw-resize; }
+    .br { right: -9px; bottom: -9px; cursor: nwse-resize; }
+    input[type="range"] { accent-color: #38bdf8; }
   </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-white">
-  <main class="mx-auto max-w-6xl px-4 py-8">
-    <section class="mb-8 rounded-3xl bg-slate-900/80 p-6 shadow-2xl ring-1 ring-white/10">
+  <div class="fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl"></div>
+    <div class="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl"></div>
+  </div>
+
+  <main class="mx-auto max-w-7xl px-4 py-7">
+    <section class="mb-6 glass rounded-[2rem] border border-white/10 p-6 shadow-2xl">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-green-400">Local Browser Tool</p>
-          <h1 class="text-3xl font-bold md:text-5xl">Video to GIF Converter</h1>
-          <p class="mt-3 max-w-2xl text-slate-300">Upload a video, crop freely, choose quality, then export and download your GIF. Files stay local in your browser. For 4GB+ videos, use a short time range for best performance.</p>
+          <p class="mb-2 text-sm font-bold uppercase tracking-[.25em] text-cyan-300">Local Video Tool by Argho</p>
+          <h1 class="text-4xl font-black md:text-6xl">Video Crop & Trim Tool</h1>
+          <p class="mt-3 max-w-3xl text-slate-300">Crop and trim large videos smoothly with local preview and browser-based export. Files stay on your computer.</p>
         </div>
-        <label class="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-green-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-green-400">
+        <label class="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 font-black text-slate-950 hover:bg-cyan-300">
           Choose Video
-          <input id="videoInput" type="file" accept="video/*" class="hidden" />
+          <input id="fileInput" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v" />
         </label>
       </div>
     </section>
 
-    <section class="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-      <div class="rounded-3xl bg-slate-900 p-4 shadow-xl ring-1 ring-white/10">
-        <div id="stage" class="relative overflow-hidden rounded-[1.5rem] border-2 border-dashed border-white/10 bg-black pb-20 transition">
+    <section class="grid gap-6 lg:grid-cols-[1.55fr_.9fr]">
+      <div class="glass rounded-[2rem] border border-white/10 p-4 shadow-xl">
+        <div id="stage" class="relative overflow-hidden rounded-[1.5rem] border-2 border-dashed border-white/10 bg-black transition pb-20">
           <div id="dropLayer" class="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-black/70 p-8 text-center opacity-0 transition">
             <div>
               <div class="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-3xl bg-cyan-400 text-4xl text-slate-950">⬇</div>
@@ -64,19 +64,17 @@
               <p class="mt-2 text-slate-300">Large files are loaded by local reference, not uploaded.</p>
             </div>
           </div>
-
           <video id="video" class="mx-auto block w-full rounded-b-none" playsinline preload="metadata"></video>
 
           <div class="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-between border-t border-white/10 bg-slate-950/95 px-4 py-3">
             <div class="flex items-center gap-3">
-              <button id="playPauseBtn" type="button" class="rounded-xl bg-cyan-400 px-4 py-2 font-black text-slate-950 hover:bg-cyan-300">▶ Play</button>
-              <button id="muteBtn" type="button" class="rounded-xl bg-slate-800 px-4 py-2 font-black hover:bg-slate-700">🔊</button>
+              <button id="playPauseBtn" class="rounded-xl bg-cyan-400 px-4 py-2 font-black text-slate-950 hover:bg-cyan-300">▶ Play</button>
+              <button id="muteBtn" class="rounded-xl bg-slate-800 px-4 py-2 font-black hover:bg-slate-700">🔊</button>
             </div>
             <div class="text-sm text-slate-300">
               <span id="currentTime">0.00s</span>
             </div>
           </div>
-
           <div id="cropBox" class="crop-box hidden" style="left:0px;top:0px;width:100px;height:100px;">
             <span class="handle tl" data-handle="tl"></span>
             <span class="handle tr" data-handle="tr"></span>
@@ -85,324 +83,245 @@
           </div>
         </div>
 
-        <div class="mt-4 grid gap-3 sm:grid-cols-3">
-          <button id="fullCropBtn" class="rounded-xl bg-slate-800 px-4 py-3 font-semibold hover:bg-slate-700">Full Video Crop</button>
-          <button id="squareCropBtn" class="rounded-xl bg-slate-800 px-4 py-3 font-semibold hover:bg-slate-700">Square Crop</button>
-          <button id="centerCropBtn" class="rounded-xl bg-slate-800 px-4 py-3 font-semibold hover:bg-slate-700">Center 16:9 Crop</button>
+        <div class="mt-4 grid gap-3 sm:grid-cols-4">
+          <button data-preset="full" class="preset rounded-2xl bg-slate-800 px-4 py-3 font-bold hover:bg-slate-700">Full</button>
+          <button data-preset="square" class="preset rounded-2xl bg-slate-800 px-4 py-3 font-bold hover:bg-slate-700">Square</button>
+          <button data-preset="portrait" class="preset rounded-2xl bg-slate-800 px-4 py-3 font-bold hover:bg-slate-700">9:16</button>
+          <button data-preset="landscape" class="preset rounded-2xl bg-slate-800 px-4 py-3 font-bold hover:bg-slate-700">16:9</button>
         </div>
       </div>
 
-      <aside class="rounded-3xl bg-slate-900 p-5 shadow-xl ring-1 ring-white/10">
-        <h2 class="mb-4 text-2xl font-bold">Export Settings</h2>
+      <aside class="glass rounded-[2rem] border border-white/10 p-5 shadow-xl">
+        <h2 class="mb-4 text-3xl font-black">Crop & Trim</h2>
 
         <div class="mb-4 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-100">
-          <p class="font-semibold">Heavy video note</p>
-          <p class="mt-1">This browser version supports formats your browser can play, like MP4/WebM/MOV depending on device/browser. 4GB+ files can work because the file is referenced locally, but exporting a long high-resolution GIF can freeze the browser. Convert 2–8 seconds at a time.</p>
+          <p class="font-bold">Crop & trim only</p>
+          <p class="mt-1">This tool only does two things: select a time range, then crop the video area. No filters, effects, text, or complex editing.</p>
         </div>
 
         <div class="space-y-4">
-          <label class="block">
-  <div class="mb-2 flex items-center justify-between">
-    <span class="text-sm font-medium text-slate-300">
-      Start Time
-    </span>
+          <div>
+            <div class="mb-2 flex items-center justify-between text-sm text-slate-300">
+              <span>Start: <b id="startLabel">0.00s</b></span>
+              <button id="setStartBtn" class="rounded-lg bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-slate-700">Use Current</button>
+            </div>
+            <input id="startRange" type="range" min="0" max="100" step="0.01" value="0" class="w-full" />
+          </div>
 
-    <button
-      type="button"
-      id="setStartCurrent"
-      class="rounded-lg bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-slate-700"
-    >
-      Use Current
-    </button>
-  </div>
-
-  <input
-    id="startTime"
-    type="number"
-    min="0"
-    step="0.1"
-    value="0"
-    class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 outline-none focus:border-green-400"
-  />
-</label>
-
-         <label class="block">
-  <div class="mb-2 flex items-center justify-between">
-    <span class="text-sm font-medium text-slate-300">
-      End Time
-    </span>
-
-    <div class="flex gap-2">
-      <button
-        type="button"
-        id="setEndCurrent"
-        class="rounded-lg bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-slate-700"
-      >
-        Use Current
-      </button>
-
-      <button
-        type="button"
-        id="setEndFull"
-        class="rounded-lg bg-green-500 px-3 py-1 text-xs font-bold text-slate-950 hover:bg-green-400"
-      >
-        Full Length
-      </button>
-    </div>
-  </div>
-
-  <input
-    id="endTime"
-    type="number"
-    min="0"
-    step="0.1"
-    value="3"
-    class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 outline-none focus:border-green-400"
-  />
-</label>
-
-          <div class="rounded-2xl border border-white/10 bg-slate-950 p-4 text-sm text-slate-300">
-            Frame rate is handled automatically with a safe smooth setting. No FPS setup needed.
+          <div>
+            <div class="mb-2 flex items-center justify-between text-sm text-slate-300">
+              <span>End: <b id="endLabel">0.00s</b></span>
+              <button id="setEndBtn" class="rounded-lg bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-slate-700">Use Current</button>
+            </div>
+            <input id="endRange" type="range" min="0" max="100" step="0.01" value="0" class="w-full" />
           </div>
 
           <label class="block">
-            <span class="mb-1 block text-sm font-medium text-slate-300">Output Width</span>
-            <select id="outputWidth" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 outline-none focus:border-green-400">
-              <option value="original">Original Crop Width</option>
-              <option value="2160">2160px / 4K Crop</option>
-              <option value="1440">1440px / 2K Crop</option>
-              <option value="1080">1080px</option>
-              <option value="720">720px</option>
-              <option value="480">480px</option>
-              <option value="320">320px</option>
+            <span class="mb-2 block text-sm font-bold text-slate-300">Export Quality</span>
+            <select id="quality" class="w-full rounded-2xl border border-white/10 bg-slate-950 p-3 outline-none focus:border-cyan-400">
+              <option value="8000000">High - 8 Mbps</option>
+              <option value="5000000" selected>Balanced - 5 Mbps</option>
+              <option value="2500000">Small - 2.5 Mbps</option>
             </select>
           </label>
 
           <label class="block">
-            <span class="mb-1 block text-sm font-medium text-slate-300">Quality</span>
-            <select id="quality" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 outline-none focus:border-green-400">
-              <option value="1">Best / Larger File</option>
-              <option value="5" selected>Balanced</option>
-              <option value="10">Smaller File</option>
+            <span class="mb-2 block text-sm font-bold text-slate-300">Output Size</span>
+            <select id="outputSize" class="w-full rounded-2xl border border-white/10 bg-slate-950 p-3 outline-none focus:border-cyan-400">
+              <option value="original">Original Crop Size</option>
+              <option value="1920">1920px max</option>
+              <option value="1280" selected>1280px max</option>
+              <option value="1080">1080px max</option>
+              <option value="720">720px max</option>
             </select>
           </label>
 
-          <button id="generateBtn" class="w-full rounded-2xl bg-green-500 px-5 py-3 font-bold text-slate-950 transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50">Generate GIF</button>
+          <button id="playTrimBtn" class="w-full rounded-2xl bg-white px-5 py-3 font-black text-slate-950 hover:bg-slate-200">Preview Trim</button>
+          <button id="exportBtn" class="w-full rounded-2xl bg-cyan-400 px-5 py-3 font-black text-slate-950 hover:bg-cyan-300">Export Trimmed Crop</button>
         </div>
 
         <div class="mt-5 rounded-2xl bg-slate-950 p-4">
-          <p id="status" class="text-sm text-slate-300">Upload a video to start.</p>
+          <p id="status" class="text-sm text-slate-300">Choose or drop a video to start.</p>
           <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
-            <div id="progress" class="h-full w-0 bg-green-500 transition-all"></div>
+            <div id="progress" class="h-full w-0 rounded-full bg-cyan-400 transition-all"></div>
           </div>
         </div>
       </aside>
     </section>
 
-    <section id="resultSection" class="mt-6 hidden rounded-3xl bg-slate-900 p-5 shadow-xl ring-1 ring-white/10">
-      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="text-2xl font-bold">Your GIF</h2>
-        <a id="downloadBtn" class="rounded-2xl bg-white px-5 py-3 text-center font-bold text-slate-950 hover:bg-slate-200" download="converted.gif">Download GIF</a>
+    <section id="result" class="mt-6 hidden glass rounded-[2rem] border border-white/10 p-5 shadow-xl">
+      <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-3xl font-black">Export Result</h2>
+          <p class="text-sm text-slate-400">Your trimmed and cropped video is ready.</p>
+        </div>
+        <a id="download" class="rounded-2xl bg-white px-5 py-3 text-center font-black text-slate-950 hover:bg-slate-200" download="trimmed-cropped-video.webm">Download Video</a>
       </div>
-      <img id="gifPreview" class="max-w-full rounded-2xl border border-white/10" alt="Generated GIF preview" />
+      <video id="resultVideo" class="w-full rounded-2xl border border-white/10 bg-black" controls></video>
     </section>
   </main>
 
-  <canvas id="workCanvas" class="hidden"></canvas>
+  <canvas id="canvas" class="hidden"></canvas>
 
   <script>
-    const videoInput = document.getElementById('videoInput');
+    const fileInput = document.getElementById('fileInput');
     const video = document.getElementById('video');
     const stage = document.getElementById('stage');
     const dropLayer = document.getElementById('dropLayer');
+    const cropBox = document.getElementById('cropBox');
+    const startRange = document.getElementById('startRange');
+    const endRange = document.getElementById('endRange');
+    const startLabel = document.getElementById('startLabel');
+    const endLabel = document.getElementById('endLabel');
+    const statusText = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const result = document.getElementById('result');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const muteBtn = document.getElementById('muteBtn');
     const currentTimeText = document.getElementById('currentTime');
-    const cropBox = document.getElementById('cropBox');
-    const generateBtn = document.getElementById('generateBtn');
-    const statusText = document.getElementById('status');
-    const progressBar = document.getElementById('progress');
-    const gifPreview = document.getElementById('gifPreview');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const resultSection = document.getElementById('resultSection');
-    const canvas = document.getElementById('workCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const resultVideo = document.getElementById('resultVideo');
+    const download = document.getElementById('download');
 
-    let videoURL = null;
-    let dragState = null;
+    let objectURL = null;
+    let drag = null;
+    let previewLoop = null;
+    let recording = false;
 
-    function setStatus(message, progress = null) {
+    function status(message, percent = null) {
       statusText.textContent = message;
-      if (progress !== null) progressBar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+      if (percent !== null) progress.style.width = Math.max(0, Math.min(100, percent)) + '%';
     }
 
-    function waitForSeek(target) {
-      return new Promise(resolve => {
-        const done = () => {
-          video.removeEventListener('seeked', done);
-          resolve();
-        };
-        video.addEventListener('seeked', done, { once: true });
-        video.currentTime = target;
-      });
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds)) return '0.00s';
+      return seconds.toFixed(2) + 's';
     }
 
-    function getVideoRectInsideStage() {
-      const stageRect = stage.getBoundingClientRect();
-      const videoRect = video.getBoundingClientRect();
-      return {
-        left: videoRect.left - stageRect.left,
-        top: videoRect.top - stageRect.top,
-        width: videoRect.width,
-        height: videoRect.height
-      };
+    function loadFile(file) {
+      if (!file) return;
+      if (objectURL) URL.revokeObjectURL(objectURL);
+      objectURL = URL.createObjectURL(file);
+      video.src = objectURL;
+      result.classList.add('hidden');
+      const sizeGB = file.size / 1024 / 1024 / 1024;
+      status(`Loaded local file: ${file.name}${sizeGB > 2 ? ' | Large file mode active' : ''}`, 0);
     }
 
-    function applyCrop(leftPct, topPct, widthPct, heightPct) {
-      const rect = getVideoRectInsideStage();
-      cropBox.style.left = `${rect.left + rect.width * leftPct}%`;
-      cropBox.style.top = `${rect.top + rect.height * topPct}%`;
-      cropBox.style.width = `${rect.width * widthPct}px`;
-      cropBox.style.height = `${rect.height * heightPct}px`;
+    function videoRect() {
+      const s = stage.getBoundingClientRect();
+      const v = video.getBoundingClientRect();
+      return { left: v.left - s.left, top: v.top - s.top, width: v.width, height: v.height };
     }
 
     function setCropPreset(type) {
-      if (!video.src) return;
-      const rect = getVideoRectInsideStage();
+      if (!video.videoWidth) return;
+      const r = videoRect();
       cropBox.classList.remove('hidden');
-
-      if (type === 'full') {
-        cropBox.style.left = `${rect.left}px`;
-        cropBox.style.top = `${rect.top}px`;
-        cropBox.style.width = `${rect.width}px`;
-        cropBox.style.height = `${rect.height}px`;
-        return;
-      }
+      let w = r.width, h = r.height, l = r.left, t = r.top;
 
       if (type === 'square') {
-        const size = Math.min(rect.width, rect.height) * 0.85;
-        cropBox.style.left = `${rect.left + (rect.width - size) / 2}px`;
-        cropBox.style.top = `${rect.top + (rect.height - size) / 2}px`;
-        cropBox.style.width = `${size}px`;
-        cropBox.style.height = `${size}px`;
-        return;
+        w = h = Math.min(r.width, r.height) * .86;
+        l = r.left + (r.width - w) / 2;
+        t = r.top + (r.height - h) / 2;
+      } else if (type === 'portrait') {
+        const ratio = 9 / 16;
+        h = r.height * .9;
+        w = h * ratio;
+        if (w > r.width * .9) { w = r.width * .9; h = w / ratio; }
+        l = r.left + (r.width - w) / 2;
+        t = r.top + (r.height - h) / 2;
+      } else if (type === 'landscape') {
+        const ratio = 16 / 9;
+        w = r.width * .9;
+        h = w / ratio;
+        if (h > r.height * .9) { h = r.height * .9; w = h * ratio; }
+        l = r.left + (r.width - w) / 2;
+        t = r.top + (r.height - h) / 2;
       }
 
-      const targetRatio = 16 / 9;
-      let width = rect.width * 0.9;
-      let height = width / targetRatio;
-      if (height > rect.height * 0.9) {
-        height = rect.height * 0.9;
-        width = height * targetRatio;
+      cropBox.style.left = l + 'px';
+      cropBox.style.top = t + 'px';
+      cropBox.style.width = w + 'px';
+      cropBox.style.height = h + 'px';
+      clampCrop();
+    }
+
+    function clampCrop() {
+      const r = videoRect();
+      let l = parseFloat(cropBox.style.left) || r.left;
+      let t = parseFloat(cropBox.style.top) || r.top;
+      let w = parseFloat(cropBox.style.width) || r.width;
+      let h = parseFloat(cropBox.style.height) || r.height;
+      w = Math.max(50, Math.min(w, r.width));
+      h = Math.max(50, Math.min(h, r.height));
+      l = Math.max(r.left, Math.min(l, r.left + r.width - w));
+      t = Math.max(r.top, Math.min(t, r.top + r.height - h));
+      cropBox.style.left = l + 'px';
+      cropBox.style.top = t + 'px';
+      cropBox.style.width = w + 'px';
+      cropBox.style.height = h + 'px';
+    }
+
+    function cropPixels() {
+      const vr = video.getBoundingClientRect();
+      const cr = cropBox.getBoundingClientRect();
+      const x = Math.max(0, cr.left - vr.left);
+      const y = Math.max(0, cr.top - vr.top);
+      const w = Math.min(cr.width, vr.width - x);
+      const h = Math.min(cr.height, vr.height - y);
+      const sx = x * video.videoWidth / vr.width;
+      const sy = y * video.videoHeight / vr.height;
+      const sw = w * video.videoWidth / vr.width;
+      const sh = h * video.videoHeight / vr.height;
+      return { sx, sy, sw, sh };
+    }
+
+    function updateLabels() {
+      let s = Number(startRange.value);
+      let e = Number(endRange.value);
+      if (s >= e) {
+        if (document.activeElement === startRange) startRange.value = Math.max(0, e - .1);
+        else endRange.value = Math.min(video.duration || 0, s + .1);
       }
-      cropBox.style.left = `${rect.left + (rect.width - width) / 2}px`;
-      cropBox.style.top = `${rect.top + (rect.height - height) / 2}px`;
-      cropBox.style.width = `${width}px`;
-      cropBox.style.height = `${height}px`;
+      startLabel.textContent = formatTime(Number(startRange.value));
+      endLabel.textContent = formatTime(Number(endRange.value));
     }
 
-    function getCropInVideoPixels() {
-      const stageRect = stage.getBoundingClientRect();
-      const videoRect = video.getBoundingClientRect();
-      const cropRect = cropBox.getBoundingClientRect();
+    fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
 
-      const x = Math.max(0, cropRect.left - videoRect.left);
-      const y = Math.max(0, cropRect.top - videoRect.top);
-      const w = Math.min(cropRect.width, videoRect.width - x);
-      const h = Math.min(cropRect.height, videoRect.height - y);
-
-      const scaleX = video.videoWidth / videoRect.width;
-      const scaleY = video.videoHeight / videoRect.height;
-
-      return {
-        sx: Math.round(x * scaleX),
-        sy: Math.round(y * scaleY),
-        sw: Math.round(w * scaleX),
-        sh: Math.round(h * scaleY)
-      };
-    }
-
-    function clampCropBox() {
-      const videoRect = getVideoRectInsideStage();
-      const left = parseFloat(cropBox.style.left) || 0;
-      const top = parseFloat(cropBox.style.top) || 0;
-      const width = parseFloat(cropBox.style.width) || 50;
-      const height = parseFloat(cropBox.style.height) || 50;
-
-      const minSize = 40;
-      const newWidth = Math.max(minSize, Math.min(width, videoRect.width));
-      const newHeight = Math.max(minSize, Math.min(height, videoRect.height));
-      const newLeft = Math.max(videoRect.left, Math.min(left, videoRect.left + videoRect.width - newWidth));
-      const newTop = Math.max(videoRect.top, Math.min(top, videoRect.top + videoRect.height - newHeight));
-
-      cropBox.style.left = `${newLeft}px`;
-      cropBox.style.top = `${newTop}px`;
-      cropBox.style.width = `${newWidth}px`;
-      cropBox.style.height = `${newHeight}px`;
-    }
-
-    function loadVideoFile(file) {
-      if (!file) return;
-
-      if (!file.type.startsWith('video/')) {
-        setStatus('Please drop or choose a valid video file.', 0);
-        return;
-      }
-
-      if (videoURL) URL.revokeObjectURL(videoURL);
-      videoURL = URL.createObjectURL(file);
-      video.src = videoURL;
-      resultSection.classList.add('hidden');
-      playPauseBtn.textContent = '▶ Play';
-      currentTimeText.textContent = '0.00s';
-
-      const sizeGB = file.size / 1024 / 1024 / 1024;
-      const name = file.name.toLowerCase();
-      const likelyPlayable = ['.mp4', '.webm', '.mov', '.m4v', '.ogg', '.ogv'].some(ext => name.endsWith(ext));
-      const warning = sizeGB >= 4 ? ` Large file detected: ${sizeGB.toFixed(2)} GB. Keep GIF duration short.` : '';
-      const formatNote = likelyPlayable ? '' : ' If preview does not load, your browser cannot decode this format.';
-      setStatus(`Video selected: ${file.name}.${warning}${formatNote}`, 0);
-    }
-
-    videoInput.addEventListener('change', event => {
-      loadVideoFile(event.target.files[0]);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      stage.addEventListener(eventName, event => {
-        event.preventDefault();
-        if (event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('Files')) {
-          stage.classList.add('drag-over');
-        }
+    ['dragenter', 'dragover'].forEach(name => {
+      stage.addEventListener(name, e => {
+        e.preventDefault();
+        stage.classList.add('border-cyan-400');
+        dropLayer.classList.remove('opacity-0');
       });
     });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      stage.addEventListener(eventName, event => {
-        event.preventDefault();
-        if (eventName === 'drop') {
-          loadVideoFile(event.dataTransfer.files[0]);
-        }
-        stage.classList.remove('drag-over');
+    ['dragleave', 'drop'].forEach(name => {
+      stage.addEventListener(name, e => {
+        e.preventDefault();
+        stage.classList.remove('border-cyan-400');
+        dropLayer.classList.add('opacity-0');
       });
     });
+    stage.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+    document.body.addEventListener('dragover', e => e.preventDefault());
+    document.body.addEventListener('drop', e => e.preventDefault());
 
-    function updatePlayButton() {
-      playPauseBtn.textContent = video.paused ? '▶ Play' : '⏸ Pause';
-    }
+    video.addEventListener('timeupdate', () => {
+      currentTimeText.textContent = formatTime(video.currentTime);
+    });
 
     playPauseBtn.addEventListener('click', async () => {
-      if (!video.src) {
-        setStatus('Please upload a video first.', 0);
-        return;
-      }
-
+      if (!video.src) return;
       if (video.paused) {
         await video.play();
+        playPauseBtn.textContent = '⏸ Pause';
       } else {
         video.pause();
+        playPauseBtn.textContent = '▶ Play';
       }
-      updatePlayButton();
     });
 
     muteBtn.addEventListener('click', () => {
@@ -410,172 +329,159 @@
       muteBtn.textContent = video.muted ? '🔇' : '🔊';
     });
 
-    video.addEventListener('play', updatePlayButton);
-    video.addEventListener('pause', updatePlayButton);
-    video.addEventListener('ended', updatePlayButton);
-    video.addEventListener('timeupdate', () => {
-      currentTimeText.textContent = `${video.currentTime.toFixed(2)}s`;
+    video.addEventListener('pause', () => {
+      playPauseBtn.textContent = '▶ Play';
+    });
+
+    video.addEventListener('play', () => {
+      playPauseBtn.textContent = '⏸ Pause';
     });
 
     video.addEventListener('loadedmetadata', () => {
-      document.getElementById('endTime').value = Math.min(3, video.duration).toFixed(1);
-      setTimeout(() => setCropPreset('full'), 50);
-      setStatus(`Loaded: ${video.videoWidth}x${video.videoHeight}, duration ${video.duration.toFixed(1)}s. GIF will use automatic smooth timing.`, 0);
+      startRange.max = video.duration;
+      endRange.max = video.duration;
+      startRange.value = 0;
+      endRange.value = Math.min(video.duration, 8);
+      updateLabels();
+      setTimeout(() => setCropPreset('full'), 80);
+      status(`Ready: ${video.videoWidth}x${video.videoHeight}, ${formatTime(video.duration)}.`, 0);
     });
 
-    document.getElementById('fullCropBtn').addEventListener('click', () => setCropPreset('full'));
-    document.getElementById('squareCropBtn').addEventListener('click', () => setCropPreset('square'));
-    document.getElementById('centerCropBtn').addEventListener('click', () => setCropPreset('center'));
+    [startRange, endRange].forEach(input => input.addEventListener('input', updateLabels));
+    document.getElementById('setStartBtn').addEventListener('click', () => { startRange.value = Math.min(video.currentTime, Number(endRange.value) - .1); updateLabels(); });
+    document.getElementById('setEndBtn').addEventListener('click', () => { endRange.value = Math.max(video.currentTime, Number(startRange.value) + .1); updateLabels(); });
 
-    cropBox.addEventListener('pointerdown', event => {
-      event.preventDefault();
-      const handle = event.target.dataset.handle || 'move';
-      cropBox.setPointerCapture(event.pointerId);
-      dragState = {
-        handle,
-        startX: event.clientX,
-        startY: event.clientY,
-        left: parseFloat(cropBox.style.left),
-        top: parseFloat(cropBox.style.top),
-        width: parseFloat(cropBox.style.width),
-        height: parseFloat(cropBox.style.height)
+    document.querySelectorAll('.preset').forEach(btn => btn.addEventListener('click', () => setCropPreset(btn.dataset.preset)));
+
+    cropBox.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      cropBox.setPointerCapture(e.pointerId);
+      drag = {
+        handle: e.target.dataset.handle || 'move',
+        x: e.clientX,
+        y: e.clientY,
+        l: parseFloat(cropBox.style.left),
+        t: parseFloat(cropBox.style.top),
+        w: parseFloat(cropBox.style.width),
+        h: parseFloat(cropBox.style.height)
       };
     });
 
-    cropBox.addEventListener('pointermove', event => {
-      if (!dragState) return;
-      const dx = event.clientX - dragState.startX;
-      const dy = event.clientY - dragState.startY;
-      let { left, top, width, height } = dragState;
-
-      if (dragState.handle === 'move') {
-        left += dx;
-        top += dy;
-      } else {
-        if (dragState.handle.includes('r')) width += dx;
-        if (dragState.handle.includes('b')) height += dy;
-        if (dragState.handle.includes('l')) { left += dx; width -= dx; }
-        if (dragState.handle.includes('t')) { top += dy; height -= dy; }
+    cropBox.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      let { l, t, w, h } = drag;
+      if (drag.handle === 'move') { l += dx; t += dy; }
+      else {
+        if (drag.handle.includes('r')) w += dx;
+        if (drag.handle.includes('b')) h += dy;
+        if (drag.handle.includes('l')) { l += dx; w -= dx; }
+        if (drag.handle.includes('t')) { t += dy; h -= dy; }
       }
-
-      cropBox.style.left = `${left}px`;
-      cropBox.style.top = `${top}px`;
-      cropBox.style.width = `${width}px`;
-      cropBox.style.height = `${height}px`;
-      clampCropBox();
+      cropBox.style.left = l + 'px';
+      cropBox.style.top = t + 'px';
+      cropBox.style.width = w + 'px';
+      cropBox.style.height = h + 'px';
+      clampCrop();
     });
+    cropBox.addEventListener('pointerup', () => drag = null);
+    window.addEventListener('resize', () => video.videoWidth && setCropPreset('full'));
 
-    cropBox.addEventListener('pointerup', () => { dragState = null; });
-    window.addEventListener('resize', () => { if (video.src) setCropPreset('full'); });
-
-    generateBtn.addEventListener('click', async () => {
-      if (!video.src) {
-        setStatus('Please upload a video first.', 0);
-        return;
-      }
-
-      const start = Number(document.getElementById('startTime').value);
-      const end = Number(document.getElementById('endTime').value);
-      const fps = 12;
-      const quality = Number(document.getElementById('quality').value);
-      const widthSetting = document.getElementById('outputWidth').value;
-
-      if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
-        setStatus('End time must be greater than start time.', 0);
-        return;
-      }
-
-      const requestedDuration = end - start;
-      if (requestedDuration > 12) {
-        const ok = confirm('This is a long GIF export. For 4GB+ videos, 2–8 seconds is safer. Continue anyway?');
-        if (!ok) return;
-      }
-
-      const safeEnd = Math.min(end, video.duration);
-      const duration = safeEnd - start;
-      const frameCount = Math.max(1, Math.ceil(duration * fps));
-      if (frameCount > 360) {
-        const ok = confirm(`This will capture ${frameCount} frames and may freeze your browser. Continue?`);
-        if (!ok) return;
-      }
-      const crop = getCropInVideoPixels();
-
-      if (crop.sw <= 0 || crop.sh <= 0) {
-        setStatus('Invalid crop area. Please adjust the crop box.', 0);
-        return;
-      }
-
-      const outputWidth = widthSetting === 'original' ? crop.sw : Math.min(Number(widthSetting), crop.sw);
-      const outputHeight = Math.round(outputWidth * crop.sh / crop.sw);
-      canvas.width = outputWidth;
-      canvas.height = outputHeight;
-
-      generateBtn.disabled = true;
-      resultSection.classList.add('hidden');
-      setStatus('Generating GIF...', 0);
-
-      const gif = new GIF({
-        workers: 2,
-        quality,
-        width: outputWidth,
-        height: outputHeight,
-        workerScript: GIF_WORKER_URL,
-        transparent: null
-      });
-
-      try {
-        video.pause();
-
-        for (let i = 0; i < frameCount; i++) {
-          const t = start + i / fps;
-          await waitForSeek(Math.min(t, safeEnd));
-          ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, outputWidth, outputHeight);
-          gif.addFrame(ctx, { copy: true, delay: 1000 / fps });
-          setStatus(`Capturing frame ${i + 1} of ${frameCount}...`, ((i + 1) / frameCount) * 70);
-          await new Promise(resolve => setTimeout(resolve, 0));
+    document.getElementById('playTrimBtn').addEventListener('click', () => {
+      if (!video.src) return status('Choose a video first.', 0);
+      clearInterval(previewLoop);
+      video.currentTime = Number(startRange.value);
+      video.play();
+      previewLoop = setInterval(() => {
+        if (video.currentTime >= Number(endRange.value)) {
+          video.pause();
+          clearInterval(previewLoop);
+          status('Trim preview finished.', 100);
+        } else {
+          const p = ((video.currentTime - Number(startRange.value)) / (Number(endRange.value) - Number(startRange.value))) * 100;
+          status('Previewing selected trim...', p);
         }
-
-        gif.on('progress', value => {
-          setStatus(`Encoding GIF... ${Math.round(value * 100)}%`, 70 + value * 30);
-        });
-
-        gif.on('finished', blob => {
-          const gifURL = URL.createObjectURL(blob);
-          gifPreview.src = gifURL;
-          downloadBtn.href = gifURL;
-          resultSection.classList.remove('hidden');
-          setStatus(`Done! GIF size: ${(blob.size / 1024 / 1024).toFixed(2)} MB`, 100);
-          generateBtn.disabled = false;
-        });
-
-        gif.render();
-      } catch (error) {
-        console.error(error);
-        setStatus(`GIF generate failed: ${error.message || error}. Try shorter duration or smaller output width.`, 0);
-        generateBtn.disabled = false;
-      }
+      }, 100);
     });
 
-    document.getElementById('setStartCurrent').addEventListener('click', () => {
-  document.getElementById('startTime').value =
-    video.currentTime.toFixed(1);
-});
+    async function waitForSeek(time) {
+      return new Promise(resolve => {
+        const done = () => { video.removeEventListener('seeked', done); resolve(); };
+        video.addEventListener('seeked', done, { once: true });
+        video.currentTime = time;
+      });
+    }
 
-document.getElementById('setEndCurrent').addEventListener('click', () => {
-  document.getElementById('endTime').value =
-    video.currentTime.toFixed(1);
-});
+    function pickMime() {
+      const types = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+      return types.find(t => MediaRecorder.isTypeSupported(t)) || '';
+    }
 
-document.getElementById('setEndFull').addEventListener('click', () => {
-  if (!Number.isFinite(video.duration)) {
-    setStatus('Please upload a video first.', 0);
-    return;
-  }
+    document.getElementById('exportBtn').addEventListener('click', async () => {
+      if (!video.src) return status('Choose a video first.', 0);
+      if (!window.MediaRecorder || !canvas.captureStream) return status('Your browser does not support video export. Try Chrome/Edge.', 0);
+      if (recording) return;
 
-  document.getElementById('endTime').value = video.duration.toFixed(1);
-  setStatus(`End Time set to full video length: ${video.duration.toFixed(1)}s.`, null);
-});
+      const start = Number(startRange.value);
+      const end = Number(endRange.value);
+      const duration = end - start;
+      if (duration > 60 && !confirm('Long exports can be slow in browser. Continue?')) return;
 
+      const crop = cropPixels();
+      const maxSize = document.getElementById('outputSize').value;
+      let outW = crop.sw;
+      let outH = crop.sh;
+      if (maxSize !== 'original') {
+        const max = Number(maxSize);
+        const scale = Math.min(1, max / Math.max(outW, outH));
+        outW = Math.round(outW * scale);
+        outH = Math.round(outH * scale);
+      }
+      canvas.width = Math.max(2, Math.round(outW / 2) * 2);
+      canvas.height = Math.max(2, Math.round(outH / 2) * 2);
+
+      const fps = 30;
+      const stream = canvas.captureStream(fps);
+      const mimeType = pickMime();
+      const recorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: Number(document.getElementById('quality').value)
+      });
+      const chunks = [];
+      recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        resultVideo.src = url;
+        download.href = url;
+        result.classList.remove('hidden');
+        status(`Export complete: ${(blob.size / 1024 / 1024).toFixed(2)} MB`, 100);
+        recording = false;
+      };
+
+      recording = true;
+      await waitForSeek(start);
+      video.muted = true;
+      video.playbackRate = 1;
+      await video.play();
+      recorder.start(1000);
+      status('Exporting cropped video...', 0);
+
+      function draw() {
+        if (!recording) return;
+        ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, canvas.width, canvas.height);
+        const percent = ((video.currentTime - start) / duration) * 100;
+        status('Exporting cropped video...', percent);
+        if (video.currentTime >= end || video.ended) {
+          video.pause();
+          recorder.stop();
+          return;
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    });
   </script>
 </body>
 </html>
