@@ -185,4 +185,4 @@ Possible future upgrades:
 
 # 👨‍💻 Author
 
-Made with ❤️ using JavaScript.
+Made with ❤️ using JavaScript. Made by Argho Chakma
